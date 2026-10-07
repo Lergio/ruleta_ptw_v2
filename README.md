@@ -11,7 +11,6 @@ Ruleta que elige por vos qué anime empezar (o retomar), armada con tu lista de 
 - Los animes "en espera" indican cuánto viste y desde qué episodio retomar.
 - Los que todavía no se emitieron cuentan en el total pero no participan del sorteo.
 - Filtros por estado (todos / plan to watch / en espera) y por tipo (TV, Movie, OVA…).
-- "Ya lo empecé" / "Ya lo retomé" saca el anime de la ruleta (se guarda en tu navegador).
 - "Borrar y girar de nuevo" descarta el resultado y vuelve a sortear; historial de tiradas.
 - Tema claro/oscuro automático y diseño responsivo.
 
@@ -50,4 +49,4 @@ Para desarrollar en local: `npm install` y `npm run dev` (requiere agregar `http
 
 ## Privacidad
 
-No hay servidor propio con datos: la lista se pide en el momento a MyAnimeList (vía el proxy) y solo se guarda en tu navegador tu usuario y qué animes marcaste como "ya empecé".
+No hay servidor propio con datos: la lista se pide en el momento a MyAnimeList (vía el proxy) .y solo se guarda en tu navegador tu nombre de usuario.
