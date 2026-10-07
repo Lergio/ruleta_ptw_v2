@@ -1,86 +1,70 @@
-import { useEffect, useState } from 'react'
 import { useWatchlist } from './hooks/useWatchlist'
 import { useRoulette } from './hooks/useRoulette'
-import { fetchRelatedAnime } from './lib/mal'
+import UserForm from './components/UserForm'
+import Wheel from './components/Wheel'
 
-// Página de PRUEBA de la Fase 2: se reemplaza en la Fase 3 por la interfaz real.
 export default function App() {
   const { initialUser, user, animes, loading, error, load } = useWatchlist()
   const r = useRoulette(animes, user)
-  const [name, setName] = useState(initialUser)
-  const [related, setRelated] = useState([])
 
-  // Simula el final del giro (en la Fase 3 lo hace el componente Wheel)
-  useEffect(() => {
-    if (!r.plan) return
-    const t = setTimeout(() => r.finishSpin(r.plan), 800)
-    return () => clearTimeout(t)
-  }, [r.plan]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Trae precuela y secuela del resultado
-  useEffect(() => {
-    setRelated([])
-    if (!r.current) return
-    let cancelled = false
-    fetchRelatedAnime(r.current.id)
-      .then((list) => {
-        if (!cancelled) setRelated(list)
-      })
-      .catch(() => {})
-    return () => {
-      cancelled = true
-    }
-  }, [r.current])
+  const message = animes.length
+    ? `${animes.length} animes cargados de ${user} (plan to watch + en espera).`
+    : ''
 
   return (
-    <main className="min-h-screen bg-slate-900 text-white p-6 max-w-xl mx-auto space-y-4">
-      <h1 className="text-2xl font-bold">Prueba de la Fase 2</h1>
-
-      <div className="flex gap-2">
-        <input
-          className="flex-1 rounded bg-slate-800 px-3 py-2"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="usuario de MyAnimeList"
-        />
-        <button
-          className="rounded bg-amber-400 px-4 font-bold text-slate-900 disabled:opacity-50"
-          disabled={loading}
-          onClick={() => load(name)}
-        >
-          {loading ? 'Cargando…' : 'Cargar'}
-        </button>
-      </div>
-      {error && <p className="text-red-400">{error}</p>}
-
-      <p>
-        Total: {r.total} · En la ruleta: {r.pool.length} · Sin emitir: {r.upcomingCount} · Gajos:{' '}
-        {r.segs.length}
-      </p>
-
-      <button
-        className="rounded bg-amber-400 px-4 py-2 font-bold text-slate-900 disabled:opacity-50"
-        disabled={!r.canSpin}
-        onClick={r.spin}
-      >
-        {r.spinning ? 'Girando…' : 'Girar'}
-      </button>
-
-      {r.current && !r.spinning && (
-        <div className="space-y-1 rounded bg-slate-800 p-4">
-          <p className="text-xl font-bold">{r.current.t}</p>
-          <p>
-            {r.current.y} · {r.current.yr ?? 'sin año'} ·{' '}
-            {r.current.durMin ? `${r.current.durMin} min/cap` : 'sin duración'}
+    <div className="mx-auto max-w-5xl px-5 pb-12 pt-7">
+      <header className="mb-5">
+        <h1 className="mb-1.5 font-display text-[clamp(1.9rem,4.5vw,3rem)] leading-[1.1] tracking-tight">
+          ¿Qué anime empiezo?
+        </h1>
+        <p className="text-muted">
+          {r.total
+            ? `${r.pool.length} de ${r.total} animes en la ruleta`
+            : 'Cargá tu lista de MyAnimeList para armar la ruleta.'}
+        </p>
+        {r.upcomingCount > 0 && (
+          <p className="text-sm text-muted">
+            {r.upcomingCount}{' '}
+            {r.upcomingCount === 1 ? 'todavía no se emitió' : 'todavía no se emitieron'} y no
+            participan del sorteo.
           </p>
-          <p>{r.current.genres.join(', ')}</p>
-          {related.map((x) => (
-            <p key={x.id}>
-              {x.relLabel}: {x.t}
-            </p>
-          ))}
-        </div>
-      )}
-    </main>
+        )}
+      </header>
+
+      <UserForm
+        initialUser={initialUser}
+        loading={loading}
+        error={error}
+        message={message}
+        onLoad={load}
+      />
+
+      <main className="mt-7 grid gap-9 md:grid-cols-[1.05fr_1fr] md:items-start">
+        <Wheel segs={r.segs} rotation={r.rotation} plan={r.plan} onFinish={r.finishSpin} />
+
+        {/* Panel temporal: en la 3B se reemplaza por los componentes definitivos */}
+        <section className="flex min-w-0 flex-col gap-5">
+          <div className="min-h-[190px] rounded-2xl border-2 border-line bg-surface p-5">
+            {r.spinning ? (
+              <p className="text-muted">Girando…</p>
+            ) : r.current ? (
+              <>
+                <h2 className="font-display text-2xl leading-tight">{r.current.t}</h2>
+                <p className="mt-2 text-muted">{r.current.y}</p>
+              </>
+            ) : (
+              <p className="text-muted">Todavía no giraste. Tocá Girar y la ruleta elige por vos.</p>
+            )}
+          </div>
+          <button
+            onClick={r.spin}
+            disabled={!r.canSpin}
+            className="self-start rounded-xl border-2 border-accent bg-accent px-8 py-3 text-lg font-bold text-on-accent hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {r.spinning ? 'Girando…' : r.current ? 'Girar de nuevo' : 'Girar'}
+          </button>
+        </section>
+      </main>
+    </div>
   )
 }
