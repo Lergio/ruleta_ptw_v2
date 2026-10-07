@@ -9,7 +9,7 @@ import History from './components/History'
 
 export default function App() {
   const { initialUser, user, animes, loading, error, load } = useWatchlist()
-  const r = useRoulette(animes, user)
+  const r = useRoulette(animes)
 
   const message = animes.length
     ? `${animes.length} animes cargados de ${user} (plan to watch + en espera).`
@@ -20,14 +20,14 @@ export default function App() {
   else if (r.total > 0) {
     placeholder =
       r.pool.length === 0
-        ? 'No quedan animes con estos filtros. Activá otro tipo o restaurá la lista.'
+        ? 'No quedan animes con estos filtros. Activá otro tipo.'
         : 'Todavía no giraste. Tocá Girar y la ruleta elige por vos.'
   } else if (user) {
     placeholder = 'Este usuario no tiene animes en plan to watch ni en espera.'
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-5 pb-12 pt-7">
+    <div className="mx-auto max-w-7xl px-5 pb-12 pt-7">
       <header className="mb-5">
         <h1 className="mb-1.5 font-display text-[clamp(1.9rem,4.5vw,3rem)] leading-[1.1] tracking-tight">
           ¿Qué anime empiezo?
@@ -54,7 +54,7 @@ export default function App() {
         onLoad={load}
       />
 
-      <main className="mt-7 grid gap-9 md:grid-cols-[1.05fr_1fr] md:items-start">
+      <main className="mt-7 grid gap-9 md:grid-cols-2 md:items-start lg:grid-cols-[minmax(0,480px)_minmax(0,1fr)] lg:gap-12">
         <Wheel segs={r.segs} rotation={r.rotation} plan={r.plan} onFinish={r.finishSpin} />
 
         <section className="flex min-w-0 flex-col gap-5">
@@ -64,10 +64,8 @@ export default function App() {
             current={r.current}
             spinning={r.spinning}
             canSpin={r.canSpin}
-            isStarted={r.isStarted}
             onSpin={r.spin}
             onRedo={r.redo}
-            onToggleStarted={r.toggleStarted}
           />
 
           {r.total > 0 && (
@@ -84,17 +82,6 @@ export default function App() {
           )}
 
           <History history={r.history} onClear={r.clearHistory} />
-
-          {r.startedCount > 0 && (
-            <button
-              type="button"
-              onClick={r.restoreStarted}
-              disabled={r.spinning}
-              className="self-start text-left text-[.93rem] text-muted underline hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Restaurar los {r.startedCount} que ya saqué
-            </button>
-          )}
         </section>
       </main>
     </div>
