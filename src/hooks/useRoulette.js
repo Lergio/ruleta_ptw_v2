@@ -1,19 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { MODES } from '../lib/constants'
-import { getJSON, setJSON } from '../lib/storage'
 import { idleSegments, mod, planSpin } from '../lib/wheel'
-
-const startedKey = (user) => 'ruleta-empezados:' + user.toLowerCase()
 
 const inMode = (a, mode) =>
   mode === 'todos' || (mode === 'espera' ? a.s === 'on_hold' : a.s === 'plan_to_watch')
 
-// Toda la lógica de la ruleta: filtros, sorteo, historial y "ya lo empecé".
+// Toda la lógica de la ruleta: filtros, sorteo e historial.
 // No dibuja nada: la ruleta (canvas) anima el giro y avisa con finishSpin().
-export function useRoulette(animes, user) {
+export function useRoulette(animes) {
   const [mode, setMode] = useState('todos')
   const [disabledTypes, setDisabledTypes] = useState(() => new Set())
-  const [started, setStarted] = useState(() => new Set())
   const [segs, setSegs] = useState([])
   const [rotation, setRotation] = useState(() => Math.random() * Math.PI * 2)
   const [plan, setPlan] = useState(null)
@@ -26,14 +22,13 @@ export function useRoulette(animes, user) {
   useEffect(() => {
     setMode('todos')
     setDisabledTypes(new Set())
-    setStarted(new Set(getJSON(startedKey(user), [])))
     setCurrent(null)
     setHistory([])
     setPlan(null)
     setSpinning(false)
     setRotation(Math.random() * Math.PI * 2)
     setShuffleTick((t) => t + 1)
-  }, [animes, user])
+  }, [animes])
 
   // Tipos disponibles, del más al menos frecuente
   const types = useMemo(() => {
@@ -46,41 +41,31 @@ export function useRoulette(animes, user) {
 
   // Los que todavía no se emitieron (a.u) cuentan en el total pero nunca se sortean
   const pool = useMemo(
-    () =>
-      animes.filter(
-        (a) => !a.u && !disabledTypes.has(a.y) && inMode(a, mode) && !started.has(a.id),
-      ),
-    [animes, disabledTypes, mode, started],
+    () => animes.filter((a) => !a.u && !disabledTypes.has(a.y) && inMode(a, mode)),
+    [animes, disabledTypes, mode],
   )
 
   const modeCounts = useMemo(() => {
     const out = {}
     MODES.forEach(({ key }) => {
       out[key] = animes.filter(
-        (a) => !a.u && !disabledTypes.has(a.y) && inMode(a, key) && !started.has(a.id),
+        (a) => !a.u && !disabledTypes.has(a.y) && inMode(a, key),
       ).length
     })
     return out
-  }, [animes, disabledTypes, started])
+  }, [animes, disabledTypes])
 
   const typeCounts = useMemo(() => {
     const out = {}
     types.forEach((t) => {
-      out[t] = animes.filter(
-        (a) => a.y === t && !a.u && inMode(a, mode) && !started.has(a.id),
-      ).length
+      out[t] = animes.filter((a) => a.y === t && !a.u && inMode(a, mode)).length
     })
     return out
-  }, [animes, types, mode, started])
+  }, [animes, types, mode])
 
   const upcomingCount = useMemo(() => animes.filter((a) => a.u).length, [animes])
-  const startedCount = useMemo(
-    () => animes.filter((a) => started.has(a.id)).length,
-    [animes, started],
-  )
 
   // Gajos con la ruleta quieta: se mezclan al cambiar filtros o la lista
-  // (no al marcar "ya lo empecé", para que la ruleta no salte)
   useEffect(() => {
     if (spinning) return
     setSegs(idleSegments(pool))
@@ -137,22 +122,6 @@ export function useRoulette(animes, user) {
     [spinning],
   )
 
-  // "Ya lo empecé" / "Deshacer" sobre el resultado actual
-  const toggleStarted = useCallback(() => {
-    if (!current) return
-    const next = new Set(started)
-    if (next.has(current.id)) next.delete(current.id)
-    else next.add(current.id)
-    setStarted(next)
-    setJSON(startedKey(user), [...next])
-  }, [current, started, user])
-
-  const restoreStarted = useCallback(() => {
-    setStarted(new Set())
-    setJSON(startedKey(user), [])
-    setShuffleTick((t) => t + 1)
-  }, [user])
-
   return {
     // filtros
     mode,
@@ -166,7 +135,6 @@ export function useRoulette(animes, user) {
     pool,
     total: animes.length,
     upcomingCount,
-    startedCount,
     // ruleta
     segs,
     rotation,
@@ -176,12 +144,8 @@ export function useRoulette(animes, user) {
     spin,
     finishSpin,
     redo,
-    // resultado
+    // resultado e historial
     current,
-    isStarted: current ? started.has(current.id) : false,
-    toggleStarted,
-    restoreStarted,
-    // historial
     history,
     clearHistory,
   }
