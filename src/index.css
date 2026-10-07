@@ -1,1 +1,70 @@
 @import "tailwindcss";
+
+/* Colores y tipografías disponibles como clases: bg-page, bg-surface, text-ink,
+   text-muted, border-line, bg-accent, text-on-accent, text-danger, font-display */
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-danger: var(--danger);
+  --font-display: "Dela Gothic One", "Arial Black", "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  --page: #f6f3fb;
+  --surface: #ffffff;
+  --ink: #1a1526;
+  --muted: #5e5673;
+  --line: #d9d2e8;
+  --accent: #3b3fd0;
+  --on-accent: #ffffff;
+  --danger: #b3261e;
+  /* los lee el canvas de la ruleta */
+  --rim: #1a1526;
+  --hub: #ffffff;
+  --lamp: #ffc95c;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #14121f;
+    --surface: #201c33;
+    --ink: #f2eef8;
+    --muted: #a79fc0;
+    --line: #382f55;
+    --accent: #ffc95c;
+    --on-accent: #1a1526;
+    --danger: #ff8f85;
+    --rim: #0c0a14;
+    --hub: #201c33;
+    --lamp: #ffc95c;
+  }
+}
+
+@layer base {
+  html {
+    background: var(--page);
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--page);
+    color: var(--ink);
+    font-family: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.5;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
+  }
+}
