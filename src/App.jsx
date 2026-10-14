@@ -6,10 +6,14 @@ import ResultCard from './components/ResultCard'
 import Actions from './components/Actions'
 import Filters from './components/Filters'
 import History from './components/History'
+import { useStreamingLinks } from "./hooks/useStreamingLinks";
+
 
 export default function App() {
   const { initialUser, user, animes, loading, error, load } = useWatchlist()
   const r = useRoulette(animes)
+  
+  useStreamingLinks(r.current?.id)
 
   const message = animes.length
     ? `${animes.length} animes cargados de ${user} (plan to watch + en espera).`
