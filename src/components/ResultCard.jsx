@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { fetchRelatedAnime } from '../lib/mal'
+import { useStreamingLinks } from '../hooks/useStreamingLinks'
+import StreamingLinks from './StreamingLinks'
 
 // Caché: si un anime vuelve a salir, no se repite el pedido de precuela/secuela
 const relatedCache = new Map()
@@ -56,6 +58,7 @@ const malUrl = (id) => `https://myanimelist.net/anime/${encodeURIComponent(id)}`
 export default function ResultCard({ current, spinning, placeholder }) {
   const showResult = Boolean(current) && !spinning
   const related = useRelated(showResult ? current.id : null)
+  const streaming = useStreamingLinks(showResult ? current.id : null)
 
   let bits = []
   if (showResult) {
@@ -119,6 +122,17 @@ export default function ResultCard({ current, spinning, placeholder }) {
                   {holdText(current)}
                 </p>
               )}
+
+              <div>
+                <h3 className="mb-1.5 text-[.9rem] font-bold uppercase tracking-wide text-muted">
+                  Dónde verlo
+                </h3>
+                <StreamingLinks
+                  links={streaming.data?.links}
+                  loading={streaming.loading}
+                  fallbackUrl={streaming.data?.siteUrl}
+                />
+              </div>
 
               <a
                 href={malUrl(current.id)}
