@@ -87,7 +87,10 @@ export default function App() {
               disabledTypes={r.disabledTypes}
               typeCounts={r.typeCounts}
               onToggleType={r.toggleType}
-              disabled={r.spinning}
+              respectOrder={r.respectOrder}
+              onToggleOrder={r.toggleRespectOrder}
+              checking={r.checking}
+              disabled={r.spinning || r.checking}
             />
           )}
 
