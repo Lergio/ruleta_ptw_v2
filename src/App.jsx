@@ -47,6 +47,13 @@ export default function App() {
             participan del sorteo.
           </p>
         )}
+        {r.blockedCount > 0 && (
+          <p className="text-sm text-muted">
+            {r.blockedCount}{' '}
+            {r.blockedCount === 1 ? 'secuela quedó fuera' : 'secuelas quedaron fuera'} del sorteo
+            porque su precuela sigue pendiente.
+          </p>
+        )}
       </header>
 
       <UserForm
