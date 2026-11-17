@@ -17,7 +17,8 @@ function Chip({ pressed, count, disabled, onClick, children }) {
   )
 }
 
-// Filtros por estado (todos / plan to watch / en espera) y por tipo (TV, Movie…)
+// Filtros por estado (todos / plan to watch / en espera), por tipo (TV, Movie…)
+// y el interruptor para respetar el orden de las temporadas
 export default function Filters({
   mode,
   modeCounts,
@@ -26,6 +27,9 @@ export default function Filters({
   disabledTypes,
   typeCounts,
   onToggleType,
+  respectOrder,
+  onToggleOrder,
+  checking,
   disabled,
 }) {
   return (
@@ -63,6 +67,20 @@ export default function Filters({
           ))}
         </div>
       </fieldset>
+
+      <label className="flex cursor-pointer items-center gap-2.5 text-[.93rem] has-[:disabled]:cursor-not-allowed">
+        <input
+          type="checkbox"
+          checked={respectOrder}
+          onChange={onToggleOrder}
+          disabled={disabled}
+          className="size-4 flex-none accent-accent"
+        />
+        <span>
+          Respetar orden de las temporadas
+          {checking && <span className="text-muted"> · revisando precuela…</span>}
+        </span>
+      </label>
     </div>
   )
 }
