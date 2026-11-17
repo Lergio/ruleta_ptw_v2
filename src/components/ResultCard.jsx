@@ -1,16 +1,7 @@
 import { useEffect, useState } from 'react'
-import { fetchRelatedAnime } from '../lib/mal'
+import { getRelated } from '../lib/related'
 import { useStreamingLinks } from '../hooks/useStreamingLinks'
 import StreamingLinks from './StreamingLinks'
-
-// Caché: si un anime vuelve a salir, no se repite el pedido de precuela/secuela
-const relatedCache = new Map()
-function getRelated(id) {
-  if (!relatedCache.has(id)) {
-    relatedCache.set(id, fetchRelatedAnime(id).catch(() => []))
-  }
-  return relatedCache.get(id)
-}
 
 function useRelated(id) {
   const [related, setRelated] = useState([])
